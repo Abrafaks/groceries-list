@@ -3,47 +3,63 @@ import Content from "./Content";
 import Footer from "./Footer";
 import Header from "./Header";
 import AddItem from "./AddItem";
+import SearchItem from "./SearchItem";
 
 function App() {
-    const [items, setItems] = useState([
-        {
-            id: 1,
-            checked: false,
-            item: "Item 1",
-        },
-        {
-            id: 2,
-            checked: false,
-            item: "Item 2",
-        },
-        {
-            id: 3,
-            checked: false,
-            item: "Item 3",
-        },
-    ]);
+    const [items, setItems] = useState(
+        JSON.parse(localStorage.getItem("shoppingList"))
+    );
 
+    const [newItem, setNewItem] = useState("");
+    const [search, setSearch] = useState("");
+
+    const setAndSaveItems = (itemsList) => {
+        setItems(itemsList);
+        localStorage.setItem("shoppingList", JSON.stringify(itemsList));
+    };
     const toggleCheckbox = (id) => {
         const listItems = items.map((item) => {
             return item.id === id ? { ...item, checked: !item.checked } : item;
         });
 
-        setItems(listItems);
-        localStorage.setItem("shoppingList", JSON.stringify(listItems));
+        setAndSaveItems(listItems);
     };
 
     const deleteItem = (id) => {
         const listItems = items.filter((item) => item.id !== id);
 
-        setItems(listItems);
+        setAndSaveItems(listItems);
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!newItem.trim()) return;
+        const preparedItem = {
+            item: newItem,
+            checked: false,
+            id: items.length ? items[items.length - 1].id + 1 : 0,
+        };
+        const newItemList = [...items, preparedItem];
+        setNewItem("");
+
+        setAndSaveItems(newItemList);
     };
 
     return (
         <div className="App">
             <Header title="Groceries" />
-            <AddItem />
+            <AddItem
+                newItem={newItem}
+                setNewItem={setNewItem}
+                handleSubmit={handleSubmit}
+            />
+            <SearchItem search={search} setSearch={setSearch} />
             <Content
-                items={items}
+                items={items.filter((item) => {
+                    return item.item
+                        .toLowerCase()
+                        .includes(search.toLowerCase());
+                })}
                 deleteItem={deleteItem}
                 toggleCheckbox={toggleCheckbox}
             />
