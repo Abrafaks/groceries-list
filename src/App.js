@@ -4,6 +4,7 @@ import Footer from "./Footer";
 import Header from "./Header";
 import AddItem from "./AddItem";
 import SearchItem from "./SearchItem";
+import apiRequest from "./apiRequest";
 
 function App() {
     const API_URL = "http://localhost:3500/items";
@@ -34,21 +35,50 @@ function App() {
         (async () => await fetchItems())();
     }, []);
 
-    const toggleCheckbox = (id) => {
+    const toggleCheckbox = async (id) => {
         const listItems = items.map((item) => {
             return item.id === id ? { ...item, checked: !item.checked } : item;
         });
-
         setItems(listItems);
+
+        const filteredItem = items.filter((item) => {
+            return item.id === id;
+        });
+
+        const updateOptions = {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ checked: !filteredItem[0].checked }),
+        };
+
+        const reqUrl = `${API_URL}/${id}`;
+        const result = await apiRequest(reqUrl, updateOptions);
+
+        if (result) {
+            setFetchError(result);
+        }
     };
 
-    const deleteItem = (id) => {
+    const deleteItem = async (id) => {
         const listItems = items.filter((item) => item.id !== id);
 
+        const deleteOptions = {
+            method: "DELETE",
+        };
+
+        const reqUrl = `${API_URL}/${id}`;
+        const result = await apiRequest(reqUrl, deleteOptions);
+
+        if (result) {
+            setFetchError(result);
+        }
+
         setItems(listItems);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!newItem.trim()) return;
         const preparedItem = {
@@ -57,9 +87,23 @@ function App() {
             id: items.length ? items[items.length - 1].id + 1 : 0,
         };
         const newItemList = [...items, preparedItem];
-        setNewItem("");
 
+        setNewItem("");
         setItems(newItemList);
+
+        const postOptions = {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(preparedItem),
+        };
+
+        const result = await apiRequest(API_URL, postOptions);
+
+        if (result) {
+            setFetchError(result);
+        }
     };
 
     return (
