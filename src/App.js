@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Content from "./Content";
 import Footer from "./Footer";
 import Header from "./Header";
@@ -7,28 +7,27 @@ import SearchItem from "./SearchItem";
 
 function App() {
     const [items, setItems] = useState(
-        JSON.parse(localStorage.getItem("shoppingList"))
+        JSON.parse(localStorage.getItem("shoppingList")) || []
     );
-
     const [newItem, setNewItem] = useState("");
     const [search, setSearch] = useState("");
 
-    const setAndSaveItems = (itemsList) => {
-        setItems(itemsList);
-        localStorage.setItem("shoppingList", JSON.stringify(itemsList));
-    };
+    useEffect(() => {
+        localStorage.setItem("shoppingList", JSON.stringify(items));
+    }, [items]);
+
     const toggleCheckbox = (id) => {
         const listItems = items.map((item) => {
             return item.id === id ? { ...item, checked: !item.checked } : item;
         });
 
-        setAndSaveItems(listItems);
+        setItems(listItems);
     };
 
     const deleteItem = (id) => {
         const listItems = items.filter((item) => item.id !== id);
 
-        setAndSaveItems(listItems);
+        setItems(listItems);
     };
 
     const handleSubmit = (e) => {
@@ -42,7 +41,7 @@ function App() {
         const newItemList = [...items, preparedItem];
         setNewItem("");
 
-        setAndSaveItems(newItemList);
+        setItems(newItemList);
     };
 
     return (
