@@ -6,15 +6,33 @@ import AddItem from "./AddItem";
 import SearchItem from "./SearchItem";
 
 function App() {
-    const [items, setItems] = useState(
-        JSON.parse(localStorage.getItem("shoppingList")) || []
-    );
+    const API_URL = "http://localhost:3500/items";
+
+    const [items, setItems] = useState([]);
     const [newItem, setNewItem] = useState("");
     const [search, setSearch] = useState("");
+    const [fetchError, setFetchError] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        localStorage.setItem("shoppingList", JSON.stringify(items));
-    }, [items]);
+        const fetchItems = async () => {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) {
+                    throw Error("Data fetch error");
+                }
+                const listItems = await response.json();
+                setItems(listItems);
+                setFetchError(null);
+            } catch (e) {
+                setFetchError(e.message);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        (async () => await fetchItems())();
+    }, []);
 
     const toggleCheckbox = (id) => {
         const listItems = items.map((item) => {
@@ -53,15 +71,23 @@ function App() {
                 handleSubmit={handleSubmit}
             />
             <SearchItem search={search} setSearch={setSearch} />
-            <Content
-                items={items.filter((item) => {
-                    return item.item
-                        .toLowerCase()
-                        .includes(search.toLowerCase());
-                })}
-                deleteItem={deleteItem}
-                toggleCheckbox={toggleCheckbox}
-            />
+            <main>
+                {isLoading && <p>Loading Items...</p>}
+                {fetchError && (
+                    <p style={{ color: "red" }}>{`Error: ${fetchError}`}</p>
+                )}
+                {!fetchError && !isLoading && (
+                    <Content
+                        items={items.filter((item) => {
+                            return item.item
+                                .toLowerCase()
+                                .includes(search.toLowerCase());
+                        })}
+                        deleteItem={deleteItem}
+                        toggleCheckbox={toggleCheckbox}
+                    />
+                )}
+            </main>
             <Footer length={items.length} />
         </div>
     );
