@@ -2,7 +2,7 @@ import ItemList from "./ItemList";
 
 const Content = ({ items, deleteItem, toggleCheckbox }) => {
     return (
-        <main>
+        <>
             {items.length ? (
                 <ItemList
                     items={items}
@@ -12,7 +12,7 @@ const Content = ({ items, deleteItem, toggleCheckbox }) => {
             ) : (
                 <p style={{ marginTop: "2rem" }}>Your list is empty</p>
             )}
-        </main>
+        </>
     );
 };
 
