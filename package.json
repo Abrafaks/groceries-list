@@ -1,7 +1,7 @@
 {
     "name": "start-app",
     "version": "0.1.0",
-    "homepage": "htpps://abrafaks.github.io/groceries",
+    "homepage": "https://abrafaks.github.io/groceries",
     "private": true,
     "dependencies": {
         "@testing-library/jest-dom": "^5.17.0",
